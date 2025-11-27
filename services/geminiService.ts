@@ -2,9 +2,15 @@ import { GoogleGenAI, Type, Schema } from "@google/genai";
 import { ProductInfo, GeneratedContent } from "../types";
 import { SYSTEM_PROMPT_TEMPLATE } from "../constants";
 
-// Initialize the API client
-// Note: In a production environment, ensure process.env.API_KEY is set.
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// Helper to get the AI client safely
+const getAIClient = () => {
+  const apiKey = process.env.API_KEY;
+  if (!apiKey) {
+    console.error("API Key is missing. Please set API_KEY in your environment variables.");
+    throw new Error("Chave de API não configurada.");
+  }
+  return new GoogleGenAI({ apiKey });
+};
 
 /**
  * Extracts product title and description from a Shopee URL using Google Search Grounding.
@@ -13,6 +19,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
  */
 export const extractProductInfo = async (url: string): Promise<ProductInfo> => {
   try {
+    const ai = getAIClient();
     const modelId = "gemini-2.5-flash"; // Good balance of speed and search capability
     
     const prompt = `
@@ -61,6 +68,7 @@ export const generateSocialContent = async (
   timeInSeconds: number
 ): Promise<GeneratedContent> => {
   try {
+    const ai = getAIClient();
     const modelId = "gemini-2.5-flash"; 
 
     // Inject values into the template
